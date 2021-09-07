@@ -32,13 +32,13 @@ void Rst::Rasterizer::DrawTriangle(Rst::PosId posBuf,Rst::IndId indBuf,Rst::ColI
             mvp * ToVec4(buf[i[2]],1.0f)
 
         };
-        //KS: 透视除法 
+        //KS: 透视除法 Homogeneous division齐次除法是的w为1
         for (auto& vec : v)
         {
             vec /= vec.w();
         }
 
-        //KS: 视口变换: Homogeneous division齐次除法是的w为1
+        //KS: 视口变换
         for (auto& vert : v)
         {
             vert.x() = 0.5 * width * (vert.x() + 1.0);
@@ -91,7 +91,7 @@ void Rst::Rasterizer::RasterizeTriangleFill(const Triangle& t)
     float maxX = std::ceil(std::max(tri[0][0], std::max(tri[1][0], tri[2][0])));//KS: 拿出ABC点的x坐标
     float maxY = std::ceil(std::max(tri[0][1], std::max(tri[1][1], tri[2][1])));//KS: 拿出ABC点的y坐标
 
-    
+    //KS: 抗锯齿在global.h中设置
     if (MSAA)
     {
         std::vector<Eigen::Vector2f> pos
@@ -288,10 +288,11 @@ void Rst::Rasterizer::DrawLine(Eigen::Vector4f begin, Eigen::Vector4f end, Eigen
 //KS:  mvp矩阵设置
 void Rst::Rasterizer::SetModel(float rotationX, float rotationY, float rotationZ)//KS:  旋转矩阵
 {
-    Eigen::Matrix4f tempZ = Eigen::Matrix4f::Identity();
+   
     float angleZ = rotationZ * MY_PI / 180;
     float angleY = rotationY * MY_PI / 180;
     float angleX = rotationX * MY_PI / 180;
+    Eigen::Matrix4f tempZ = Eigen::Matrix4f::Identity();
     tempZ <<
         std::cos(angleZ), -std::sin(angleZ), 0, 0,
         std::sin(angleZ), std::cos(angleZ), 0, 0,
@@ -313,16 +314,16 @@ void Rst::Rasterizer::SetModel(float rotationX, float rotationY, float rotationZ
         0, 0, 0, 1;
     model = tempX * tempY * tempZ;
 
-
 }
-void Rst::Rasterizer::SetView(Eigen::Vector3f camPos)
+void Rst::Rasterizer::SetView(Eigen::Vector3f eyePos)
 {
+    //KS: 而观察矩阵是相机本身变换的逆变换 
     Eigen::Matrix4f temp = Eigen::Matrix4f::Identity();
     Eigen::Matrix4f translate;
     translate <<
-        1, 0, 0, -camPos[0],
-        0, 1, 0, -camPos[1],
-        0, 0, 1, -camPos[2],
+        1, 0, 0, -eyePos[0],
+        0, 1, 0, -eyePos[1],
+        0, 0, 1, -eyePos[2],
         0, 0, 0, 1;
     view = translate * temp;//KS: set view matrix 
 
@@ -333,6 +334,7 @@ void Rst::Rasterizer::SetProjection(float camFov, float aspectRatio, float zNear
     auto n = zNear;
     auto f = zFar;
 
+    //KS: https://smuwm007.feishu.cn/docs/doccn2FNKtTm58i2R4jISC7vd4e#KufB6G 
     Eigen::Matrix4f p2o;
     p2o <<
         n, 0, 0, 0,

@@ -30,50 +30,26 @@ int main()
     std::cout << v*3.0f << std::endl;
 
     //KS: 矩阵逐个元素定义并输出
+    //一个有意思的现象: Eigen的矩阵下标是从上到下, 然后再是左到右排列的
     Eigen::Matrix3f i;
-    i << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+    i << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0;
     std::cout << i << std::endl;
     */
  //KS: opencv test   
   /*   cv::Mat img = cv::imread("test.jpg");
     imshow("f22", img);
     cv::waitKey(0);*/
+
     int key = 0;
     int frame_count = 0;
     float angleX = 0, angleY = 0, angleZ = 0;
-    Obj::Loader Loader;
-    std::string objPath = "../models/spot/";
-    //KS: 加载obj模型
-    std::vector<Triangle*> TriangleList;
 
-
-    bool isLoad = Loader.LoadFile("D:/Games/Games101/Rasterizer/models/spot/spot_triangulated_good.obj"); 
-    for (auto mesh : Loader.loadedMeshesList)
-    {
-        for (int i = 0; i < mesh.vertices.size(); i += 3)//KS: 三角形循环 
-        {
-            Triangle* t = new Triangle();
-            for (int j = 0; j < 3; j++)//KS: 顶点循环 ,将mesh封装成triangle
-            {
-                t->SetVertex(j, Eigen::Vector4f(mesh.vertices[i + j].Position.x,
-                    mesh.vertices[i + j].Position.y,
-                    mesh.vertices[i + j].Position.z, 1.0f));
-                t->SetNormal(j, Eigen::Vector3f(mesh.vertices[i + j].Normal.x,
-                    mesh.vertices[i + j].Normal.y,
-                    mesh.vertices[i + j].Normal.z));
-                t->SetTexCoord(j, Eigen::Vector2f(mesh.vertices[i + j].TextureCoordinate.x,
-                    mesh.vertices[i + j].TextureCoordinate.y));
-
-            }
-            TriangleList.push_back(t);
-        }
-    }
-
+    //KS: 初始化视窗 
     Rst::Rasterizer r(700, 700);
-    
-    Eigen::Vector3f camPos = {0,0,10};
+    //KS: 设置摄像机位置 
+    Eigen::Vector3f eyePos = {0,0,10};
 
-    
+/***********作业2\作业1***********/
     //KS: 渲染三角形(作业2\作业1) 
     std::vector<Eigen::Vector3f>pos{
         {2,0,-2},{0,2,-2},{-2,0,-2},
@@ -101,24 +77,54 @@ int main()
         {185.0, 50.0, 238.0},
         {185.0, 50.0, 238.0}
     };
-
+    //KS: 输入点坐标和索引 
     auto posId = r.LoadPosition(pos);
     auto indId = r.LoadIndex(ind);
     auto colId = r.LoadColor(cols);
-
+/***********作业2\作业1***********/
     
 
+/***********作业3***********/
+
+    Obj::Loader Loader;
+    std::string objPath = "../models/spot/";
+    //KS: 加载obj模型
+    std::vector<Triangle*> TriangleList;
+
+
+
+    bool isLoad = Loader.LoadFile("D:/Games/Games101/Rasterizer/models/spot/spot_triangulated_good.obj");
+    for (auto mesh : Loader.loadedMeshesList)
+    {
+        for (int i = 0; i < mesh.vertices.size(); i += 3)//KS: 三角形循环 
+        {
+            Triangle* t = new Triangle();
+            for (int j = 0; j < 3; j++)//KS: 顶点循环 ,将mesh封装成triangle
+            {
+                t->SetVertex(j, Eigen::Vector4f(mesh.vertices[i + j].Position.x,
+                    mesh.vertices[i + j].Position.y,
+                    mesh.vertices[i + j].Position.z, 1.0f));
+                t->SetNormal(j, Eigen::Vector3f(mesh.vertices[i + j].Normal.x,
+                    mesh.vertices[i + j].Normal.y,
+                    mesh.vertices[i + j].Normal.z));
+                t->SetTexCoord(j, Eigen::Vector2f(mesh.vertices[i + j].TextureCoordinate.x,
+                    mesh.vertices[i + j].TextureCoordinate.y));
+
+            }
+            TriangleList.push_back(t);
+        }
+    }
 
    //KS: 选择Shader(Model)
     r.SelectShader(Rst::ShaderType::Normal);
-
-    while (key != 27)
+/***********作业3***********/
+    while (key != 27)//KS: esc退出循环 
     {
         r.Clear(Rst::Buffer::Color | Rst::Buffer::Depth);
 
 
         r.SetModel(angleX,angleY,angleZ);
-        r.SetView(camPos);
+        r.SetView(eyePos);
         r.SetProjection(45.0, 1, 0.1, 50);//KS: fov:45,宽高比:1, Near:0.1,Far:50 
 
 
@@ -136,7 +142,7 @@ int main()
 
 
 
-        //KS: 操纵摄像头 
+        //KS: 操纵模型
         if (key == 'a') {
             angleZ += 10;
         }
@@ -156,10 +162,10 @@ int main()
             angleY -= 10;
         }
         else if (key == 'p') {
-            camPos[2] -= 1;
+            eyePos[2] -= 1;
         }
         else if (key == 'l') {
-            camPos[2] += 1;
+            eyePos[2] += 1;
         }
     }
     

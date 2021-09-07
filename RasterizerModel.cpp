@@ -33,47 +33,7 @@ static Eigen::Vector2f Interpolate(float alpha, float beta, float gamma,
 	return Eigen::Vector2f(u, v);
 }
 
-void Rst::Rasterizer::RasterizeModel(const Triangle& t, const std::array<Eigen::Vector3f, 3>& viewPos)
-{
-	auto v = t.ToVector4();
 
-	float minX = std::floor(std::min(v[0][0], std::min(v[1][0], v[2][0])));
-	float minY = std::floor(std::min(v[0][1], std::min(v[1][1], v[2][1])));
-	float maxX = std::ceil(std::max(v[0][0], std::max(v[1][0], v[2][0])));
-	float maxY = std::ceil(std::max(v[0][1], std::max(v[1][1], v[2][1])));
-
-	for (int x = minX; x <= maxX; x++)
-	{
-		for (int y = minY; y <= maxY; y++)
-		{
-			if (InsideTriangle(x, y, t.v))
-			{
-				//KS: 计算重心坐标
-				auto abg = ComputeBarycentric2D((float)x + 0.5f, (float)y + 0.5f, t.v);
-				auto alpha = std::get<0>(abg);
-				auto beta = std::get<1>(abg);
-				auto gamma = std::get<2>(abg);
-				float w = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
-				float z = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
-				z *= w;
-				if (depthBuffer[GetIndex(x, y)] > z)
-				{
-					auto interpolatedColor = Interpolate(alpha, beta, gamma, t.color[0], t.color[1], t.color[2], 1);
-					auto interpolatedNormal = Interpolate(alpha, beta, gamma, t.normal[0], t.normal[1], t.normal[2], 1);
-					auto interpolatedTexcoords = Interpolate(alpha, beta, gamma, t.texCoords[0], t.texCoords[1], t.texCoords[2], 1);
-					auto interpolatedShadingcoords = Interpolate(alpha, beta, gamma, viewPos[0], viewPos[1], viewPos[2], 1);
-					depthBuffer[GetIndex(x, y)] = z;
-
-					FragmentShaderPayload payload(interpolatedColor, interpolatedNormal.normalized() , interpolatedTexcoords, texture ? &*texture : nullptr);
-					payload.viewPos = interpolatedShadingcoords;
-					auto pixelColor = fragmentShaderFunc(payload);
-					SetPixel(Eigen::Vector2i(x, y), pixelColor);
-				}
-			}
-		}
-	}
-
-}
 
 void Rst::Rasterizer::DrawModel(std::vector<Triangle*>& TriangleList)
 {
@@ -111,6 +71,7 @@ void Rst::Rasterizer::DrawModel(std::vector<Triangle*>& TriangleList)
 			vec.z() /= vec.w();
 		}
 
+		//KS: 法线的变换矩阵为模型变换矩阵的逆转置矩阵。 https://smuwm007.feishu.cn/docs/doccn2FNKtTm58i2R4jISC7vd4e#zS6JJ5
 		Eigen::Matrix4f inv_trans = (view * model).inverse().transpose();
 		Eigen::Vector4f n[] = {
 			inv_trans * ToVec4(t->normal[0], 0.0f),
@@ -138,10 +99,56 @@ void Rst::Rasterizer::DrawModel(std::vector<Triangle*>& TriangleList)
 		newTri.SetColor(1, Eigen::Vector3f(148, 121.0, 92.0));
 		newTri.SetColor(2, Eigen::Vector3f(148, 121.0, 92.0));
 
-		RasterizeModel(newTri, viewSpacePos);
+		RasterizerModel(newTri, viewSpacePos);
 
 	}
 }
+
+void Rst::Rasterizer::RasterizerModel(const Triangle& t, const std::array<Eigen::Vector3f, 3>& viewPos)
+{
+	auto v = t.ToVector4();
+
+	float minX = std::floor(std::min(v[0][0], std::min(v[1][0], v[2][0])));
+	float minY = std::floor(std::min(v[0][1], std::min(v[1][1], v[2][1])));
+	float maxX = std::ceil(std::max(v[0][0], std::max(v[1][0], v[2][0])));
+	float maxY = std::ceil(std::max(v[0][1], std::max(v[1][1], v[2][1])));
+
+	for (int x = minX; x <= maxX; x++)
+	{
+		for (int y = minY; y <= maxY; y++)
+		{
+			if (InsideTriangle(x, y, t.v))
+			{
+				//KS: 计算重心坐标
+				auto abg = ComputeBarycentric2D((float)x + 0.5f, (float)y + 0.5f, t.v);
+				auto alpha = std::get<0>(abg);
+				auto beta = std::get<1>(abg);
+				auto gamma = std::get<2>(abg);
+				float w = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+				float z = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+				z *= w;
+				if (depthBuffer[GetIndex(x, y)] > z)
+				{
+					auto interpolatedColor = Interpolate(alpha, beta, gamma, t.color[0], t.color[1], t.color[2], 1);
+					auto interpolatedNormal = Interpolate(alpha, beta, gamma, t.normal[0], t.normal[1], t.normal[2], 1);
+					auto interpolatedTexcoords = Interpolate(alpha, beta, gamma, t.texCoords[0], t.texCoords[1], t.texCoords[2], 1);
+					auto interpolatedShadingcoords = Interpolate(alpha, beta, gamma, viewPos[0], viewPos[1], viewPos[2], 1);
+					depthBuffer[GetIndex(x, y)] = z;
+
+					FragmentShaderPayload payload(interpolatedColor, interpolatedNormal.normalized(), interpolatedTexcoords, texture ? &*texture : nullptr);
+					payload.viewPos = interpolatedShadingcoords;
+					auto pixelColor = fragmentShaderFunc(payload);
+					SetPixel(Eigen::Vector2i(x, y), pixelColor);
+				}
+			}
+		}
+	}
+
+}
+
+
+
+
 //KS: Shader 
 Eigen::Vector3f NormalFragmentShader(const FragmentShaderPayload& payload)
 {

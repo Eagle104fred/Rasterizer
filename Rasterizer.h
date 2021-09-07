@@ -94,7 +94,7 @@ namespace Rst{
 		void DrawLine(Eigen::Vector4f begin, Eigen::Vector4f end, Eigen::Vector3f color);
 		void RasterizeTriangleLine(const Triangle& t);
 		void RasterizeTriangleFill(const Triangle& t);
-		void RasterizeModel(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos);
+		void RasterizerModel(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos);
 		bool InsideTriangle(float x, float y, const Eigen::Vector4f* tri);
 		std::tuple<float, float, float> ComputeBarycentric2D(float x, float y, const Vector4f* tri);
 
