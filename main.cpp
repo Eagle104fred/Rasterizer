@@ -91,8 +91,6 @@ int main()
     //KS: 加载obj模型
     std::vector<Triangle*> TriangleList;
 
-
-
     bool isLoad = Loader.LoadFile("D:/Games/Games101/Rasterizer/models/spot/spot_triangulated_good.obj");
     for (auto mesh : Loader.loadedMeshesList)
     {
@@ -130,8 +128,8 @@ int main()
 
         //KS: 显示不同的案例 
         //r.DrawTriangle(posId, indId,colId,Rst::Primitive::Line);
-        //r.DrawTriangle(posId, indId, colId, Rst::Primitive::Fill);
-        r.DrawModel(TriangleList);
+        r.DrawTriangle(posId, indId, colId, Rst::Primitive::Fill);
+        //r.DrawModel(TriangleList);
 
 
 
@@ -168,11 +166,5 @@ int main()
             eyePos[2] += 1;
         }
     }
-    
-    
-   
 
-
-	
-    
 }

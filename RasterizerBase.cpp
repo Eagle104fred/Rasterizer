@@ -97,5 +97,8 @@ std::tuple<float, float, float> Rst::Rasterizer::ComputeBarycentric2D(float x, f
     float gamma = (((xb - xa) * (yp - ya) - (xp - xa) * (yb - ya)) / (((xb - xa) * (yc - ya)) - (yb - ya) * (xc - xa)));
     float beta = (xp - xa - gamma * (xc - xa)) / (xb - xa);
     float alpha = 1.0f - beta - gamma;
+    /*float alpha = (x * (tri[1].y() - tri[2].y()) + (tri[2].x() - tri[1].x()) * y + tri[1].x() * tri[2].y() - tri[2].x() * tri[1].y()) / (tri[0].x() * (tri[1].y() - tri[2].y()) + (tri[2].x() - tri[1].x()) * tri[0].y() + tri[1].x() * tri[2].y() - tri[2].x() * tri[1].y());
+    float beta = (x * (tri[2].y() - tri[0].y()) + (tri[0].x() - tri[2].x()) * y + tri[2].x() * tri[0].y() - tri[0].x() * tri[2].y()) / (tri[1].x() * (tri[2].y() - tri[0].y()) + (tri[0].x() - tri[2].x()) * tri[1].y() + tri[2].x() * tri[0].y() - tri[0].x() * tri[2].y());
+    float gamma = (x * (tri[0].y() - tri[1].y()) + (tri[1].x() - tri[0].x()) * y + tri[0].x() * tri[1].y() - tri[1].x() * tri[0].y()) / (tri[2].x() * (tri[0].y() - tri[1].y()) + (tri[1].x() - tri[0].x()) * tri[2].y() + tri[0].x() * tri[1].y() - tri[1].x() * tri[0].y());*/
     return { alpha,beta,gamma };
 }

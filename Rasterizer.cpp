@@ -124,7 +124,7 @@ void Rst::Rasterizer::RasterizeTriangleFill(const Triangle& t)
                         if (count != 0)
                         {
                             //KS: 着色
-                            if (depthBuffer[GetIndex(x, y) > z])
+                            if (depthBuffer[GetIndex(x, y)] > z)
                             {
                                 //Eigen::Vector3f point = Eigen::Vector3f(x, y, z);
                                 Eigen::Vector2i point = Eigen::Vector2i(x, y);
@@ -132,7 +132,6 @@ void Rst::Rasterizer::RasterizeTriangleFill(const Triangle& t)
                                 depthBuffer[GetIndex(x, y)] = z;
                             }
                         }
-                        
                     }
                 }
                 
@@ -156,8 +155,9 @@ void Rst::Rasterizer::RasterizeTriangleFill(const Triangle& t)
                     float w = 1.0 / (alpha / tri[0].w() + beta / tri[1].w() + gamma / tri[2].w());//KS: 视口变换
                     float z = alpha * tri[0].z() / tri[0].w() + beta * tri[1].z() / tri[1].w() + gamma * tri[2].z() / tri[2].w();
                     z *= w;
-                    //KS: 着色
-                    if (depthBuffer[GetIndex(x, y) > z])
+                    //KS: 着色                                            
+                    if (depthBuffer[GetIndex(x, y)] > z)
+                        
                     {
                         Eigen::Vector3f point = Eigen::Vector3f(x, y, z);
                         SetPixel(point, t.GetColor());
@@ -328,7 +328,7 @@ void Rst::Rasterizer::SetView(Eigen::Vector3f eyePos)
     view = translate * temp;//KS: set view matrix 
 
 }
-void Rst::Rasterizer::SetProjection(float camFov, float aspectRatio, float zNear, float zFar)
+void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear, float zFar)
 {
     Eigen::Vector4f temp = Eigen::Vector4f::Identity();
     auto n = zNear;
@@ -342,7 +342,7 @@ void Rst::Rasterizer::SetProjection(float camFov, float aspectRatio, float zNear
         0, 0, f + n, -f * n,
         0, 0, 1, 0;
 
-    float halve = camFov / 2 * MY_PI / 180;
+    float halve = eyeFov / 2 * MY_PI / 180;
     float top = -zNear * std::tan(halve);
     float bottom = -top;
 
