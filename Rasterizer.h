@@ -8,16 +8,15 @@
 using namespace Eigen;
 
 namespace Rst{
-	//KS: 基本功能
-	
-	//KS: 这是预设的颜色 
+	//KS: 预设颜色 
 	static struct Color{
 		Eigen::Vector3f green = Eigen::Vector3f(0, 255, 0);
 		Eigen::Vector3f red = Eigen::Vector3f(0, 0, 255);
 		Eigen::Vector3f blue = Eigen::Vector3f(255, 0,0 );
 		Eigen::Vector3f white = Eigen::Vector3f(0, 0, 0);
 	}Color;
-	
+
+	//KS: 绘制三角形的时候两种模型 
 	enum class Primitive
 	{
 		Line,
@@ -49,7 +48,7 @@ namespace Rst{
 		return Buffer((int)a & (int)b);
 	}
 
-	//统计map的个数
+	//KS:  position index color 数组都有唯一的id这样不容易出错, 处理的是有是需要按顺序处理即可
 	struct PosId
 	{
 		int id = 0;
@@ -62,6 +61,7 @@ namespace Rst{
 	{
 		int id = 0;
 	};
+
 	class Rasterizer
 	{
 	public:
@@ -87,7 +87,7 @@ namespace Rst{
 		void Clear(Buffer buff);
 
 	public:
-		//KS: shader
+		//KS: 选着渲染模式
 		void SelectShader(ShaderType type);
 		
 	private:

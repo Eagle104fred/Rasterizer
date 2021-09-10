@@ -65,7 +65,7 @@ void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear
         0, 0, f + n, -f * n,
         0, 0, 1, 0;
 
-    float halve = eyeFov / 2 * MY_PI / 180;
+    float halve = eyeFov / 2 * MY_PI / 180;//KS: 记得转弧度 
     float top = -zNear * std::tan(halve);
     float bottom = -top;
 
@@ -84,7 +84,7 @@ void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear
         0, 2 / (top - bottom), 0, 0,
         0, 0, 2 / (zNear - zFar), 0,
         0, 0, 0, 1;
-
+     
     projection = p2o * m * s;
 
 }
