@@ -45,8 +45,7 @@ void Rst::Rasterizer::DrawModel(std::vector<Triangle*>& TriangleList)
 	{
 		Triangle newTri =*t;
 
-		//对三角形的坐标变换处理为了后续再三角形内插值使用。
-		//并且后续shader中的光的方向向量、视线的方向向量等都是需要基于真实坐标计算
+		//KS: 移动模型到摄像机坐标系下
 		std::array<Eigen::Vector4f, 3>mm{
 			(view * model * t->v[0]),
 			(view * model * t->v[1]),
@@ -86,6 +85,9 @@ void Rst::Rasterizer::DrawModel(std::vector<Triangle*>& TriangleList)
 			vert.y() = 0.5 * height * (vert.y() + 1.0);
 			vert.z() = vert.z() * f1 + f2;
 		}
+
+
+		//KS: 封装三角形 
 		for (int i = 0; i < 3; i++)
 		{
 			newTri.SetVertex(i, v[i]);
@@ -98,7 +100,7 @@ void Rst::Rasterizer::DrawModel(std::vector<Triangle*>& TriangleList)
 		newTri.SetColor(0, Eigen::Vector3f(148, 121.0, 92.0));
 		newTri.SetColor(1, Eigen::Vector3f(148, 121.0, 92.0));
 		newTri.SetColor(2, Eigen::Vector3f(148, 121.0, 92.0));
-
+		//KS: 渲染三角形 
 		RasterizerModel(newTri, viewSpacePos);
 
 	}
@@ -145,7 +147,6 @@ void Rst::Rasterizer::RasterizerModel(const Triangle& t, const std::array<Eigen:
 	}
 
 }
-
 
 
 

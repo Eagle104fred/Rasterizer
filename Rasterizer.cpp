@@ -23,8 +23,6 @@ void Rst::Rasterizer::DrawTriangle(Rst::PosId posBuf,Rst::IndId indBuf,Rst::ColI
     {
         Triangle t;
 
-        
-
         //KS: 使用索引取出每个三角形顶点 
         Eigen::Vector4f v[] = {
             mvp * ToVec4(buf[i[0]],1.0f),
@@ -283,86 +281,5 @@ void Rst::Rasterizer::DrawLine(Eigen::Vector4f begin, Eigen::Vector4f end, Eigen
             SetPixel(point, color);
         }
     }
-}
-
-//KS:  mvp矩阵设置
-void Rst::Rasterizer::SetModel(float rotationX, float rotationY, float rotationZ)//KS:  旋转矩阵
-{
-   
-    float angleZ = rotationZ * MY_PI / 180;
-    float angleY = rotationY * MY_PI / 180;
-    float angleX = rotationX * MY_PI / 180;
-    Eigen::Matrix4f tempZ = Eigen::Matrix4f::Identity();
-    tempZ <<
-        std::cos(angleZ), -std::sin(angleZ), 0, 0,
-        std::sin(angleZ), std::cos(angleZ), 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1;
-    Eigen::Matrix4f tempY = Eigen::Matrix4f::Identity();
-
-    tempY <<
-        std::cos(angleY), 0, std::sin(angleY), 0,
-        0, 1, 0, 0,
-        -std::sin(angleY), 0, std::cos(angleY), 0,
-        0, 0, 0, 1;
-    Eigen::Matrix4f tempX = Eigen::Matrix4f::Identity();
-
-    tempX <<
-        1, 0, 0, 0,
-        0, std::cos(angleX), -std::sin(angleX), 0,
-        0, std::sin(angleX), std::cos(angleX), 0,
-        0, 0, 0, 1;
-    model = tempX * tempY * tempZ;
-
-}
-void Rst::Rasterizer::SetView(Eigen::Vector3f eyePos)
-{
-    //KS: 而观察矩阵是相机本身变换的逆变换 
-    Eigen::Matrix4f temp = Eigen::Matrix4f::Identity();
-    Eigen::Matrix4f translate;
-    translate <<
-        1, 0, 0, -eyePos[0],
-        0, 1, 0, -eyePos[1],
-        0, 0, 1, -eyePos[2],
-        0, 0, 0, 1;
-    view = translate * temp;//KS: set view matrix 
-
-}
-void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear, float zFar)
-{
-    Eigen::Vector4f temp = Eigen::Vector4f::Identity();
-    auto n = zNear;
-    auto f = zFar;
-
-    //KS: https://smuwm007.feishu.cn/docs/doccn2FNKtTm58i2R4jISC7vd4e#KufB6G 
-    Eigen::Matrix4f p2o;
-    p2o <<
-        n, 0, 0, 0,
-        0, n, 0, 0,
-        0, 0, f + n, -f * n,
-        0, 0, 1, 0;
-
-    float halve = eyeFov / 2 * MY_PI / 180;
-    float top = -zNear * std::tan(halve);
-    float bottom = -top;
-
-    float right = top * aspectRatio;
-    float left = -right;
-
-    Eigen::Matrix4f m, s;
-    m <<
-        1, 0, 0, -(left + right) / 2,
-        0, 1, 0, -(top + bottom) / 2,
-        0, 0, 1, -(zNear + zFar) / 2,
-        0, 0, 0, 1;
-
-    s <<
-        2 / (right - left), 0, 0, 0,
-        0, 2 / (top - bottom), 0, 0,
-        0, 0, 2 / (zNear - zFar), 0,
-        0, 0, 0, 1;
-
-    projection = p2o * m * s;
-
 }
 
