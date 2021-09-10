@@ -23,6 +23,8 @@ void Rst::Rasterizer::DrawTriangle(Rst::PosId posBuf,Rst::IndId indBuf,Rst::ColI
     {
         Triangle t;
 
+        
+
         //KS: 使用索引取出每个三角形顶点 
         Eigen::Vector4f v[] = {
             mvp * ToVec4(buf[i[0]],1.0f),

@@ -41,14 +41,14 @@ void Rst::Rasterizer::SetModel(float rotationX, float rotationY, float rotationZ
 void Rst::Rasterizer::SetView(Eigen::Vector3f eyePos)
 {
     //KS: 而观察矩阵是相机本身变换的逆变换 
-    Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f temp = Eigen::Matrix4f::Identity();
     Eigen::Matrix4f translate;
     translate <<
         1, 0, 0, -eyePos[0],
         0, 1, 0, -eyePos[1],
         0, 0, 1, -eyePos[2],
         0, 0, 0, 1;
-    view = translate * view;//KS: set view matrix 
+    view = translate * temp;//KS: set view matrix 
 
 }
 void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear, float zFar)
@@ -65,7 +65,7 @@ void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear
         0, 0, f + n, -f * n,
         0, 0, 1, 0;
 
-    float halve = eyeFov / 2 * MY_PI / 180;//KS: 记得转弧度 
+    float halve = eyeFov / 2 * MY_PI / 180;
     float top = -zNear * std::tan(halve);
     float bottom = -top;
 
@@ -84,10 +84,12 @@ void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear
         0, 2 / (top - bottom), 0, 0,
         0, 0, 2 / (zNear - zFar), 0,
         0, 0, 0, 1;
-     
+
     projection = p2o * m * s;
 
 }
+
+
 
 
 //////////////////////////////////////////////////////////////
@@ -101,7 +103,7 @@ Rst::Rasterizer::Rasterizer(int w, int h) :width(w), height(h)
 
     texture = nonstd::nullopt;//KS: nonstd 用于在cpp14实现optional 
 }
-//KS:顶点序列字典 
+
 Rst::PosId Rst::Rasterizer::LoadPosition(std::vector<Eigen::Vector3f>& pos)
 {
     auto id = Rst::Rasterizer::GetNextId();
@@ -109,21 +111,20 @@ Rst::PosId Rst::Rasterizer::LoadPosition(std::vector<Eigen::Vector3f>& pos)
     return { id };
 
 }
-//KS: 顶点序列字典 
 Rst::IndId Rst::Rasterizer::LoadIndex(std::vector<Eigen::Vector3i>& ind)
 {
     auto id = Rst::Rasterizer::GetNextId();
     indMap.emplace(id, ind);
     return { id };
 }
-//KS: 顶点颜色字典 
 Rst::ColId Rst::Rasterizer::LoadColor(std::vector<Eigen::Vector3f>& col)
 {
     auto id = Rst::Rasterizer::GetNextId();
     colMap.emplace(id, col);
     return { id };
 }
-//KS: 清除颜色缓冲和深度缓冲 
+
+
 void Rst::Rasterizer::Clear(Buffer buff)
 {
     if ((buff & Rst::Buffer::Color) == Rst::Buffer::Color)
@@ -136,9 +137,11 @@ void Rst::Rasterizer::Clear(Buffer buff)
     }
 }
 
-//KS: 着色 
+
 void Rst::Rasterizer::SetPixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color)
 {
+
+
     //KS: 越界判断 
     if (point.x() < 0 || point.x() >= width
         || point.y() < 0 || point.y() >= height)return;
@@ -149,6 +152,7 @@ void Rst::Rasterizer::SetPixel(const Eigen::Vector3f& point, const Eigen::Vector
 }
 void Rst::Rasterizer::SetPixel(const Eigen::Vector2i& point, const Eigen::Vector3f& color)
 {
+
     int ind = (height  - point.y()) * width + point.x();
 
     frameBuffer[ind] = color;

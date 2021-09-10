@@ -128,7 +128,7 @@ int main()
 
         //KS: 显示不同的案例 
         //r.DrawTriangle(posId, indId,colId,Rst::Primitive::Line);
-        //r.DrawTriangle(posId, indId, colId, Rst::Primitive::Fill);
+        r.DrawTriangle(posId, indId, colId, Rst::Primitive::Fill);
         r.DrawModel(TriangleList);
 
 
