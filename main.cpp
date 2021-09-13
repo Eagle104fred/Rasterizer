@@ -47,7 +47,7 @@ int main()
     //KS: 初始化视窗 
     Rst::Rasterizer r(700, 700);
     //KS: 设置摄像机位置 
-    Eigen::Vector3f eyePos = {0,0,10};
+    Eigen::Vector3f eyePos = {0,0,20};
 
 /***********作业2\作业1***********/
     //KS: 渲染三角形(作业2\作业1) 
@@ -129,7 +129,7 @@ int main()
         //KS: 显示不同的案例 
         //r.DrawTriangle(posId, indId,colId,Rst::Primitive::Line);
         r.DrawTriangle(posId, indId, colId, Rst::Primitive::Fill);
-        r.DrawModel(TriangleList);
+        //r.DrawModel(TriangleList);
 
 
 

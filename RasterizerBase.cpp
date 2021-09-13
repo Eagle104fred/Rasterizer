@@ -38,6 +38,31 @@ void Rst::Rasterizer::SetModel(float rotationX, float rotationY, float rotationZ
     model = tempX * tempY * tempZ;
 
 }
+
+void Rst::Rasterizer::SetView(Eigen::Vector3f eyePos,Eigen::Vector3f at)
+{
+    Eigen::Vector3f up (0, 1, 0);
+  
+    
+    Eigen::Vector3f xAxis, yAxis, zAxis;
+    zAxis = at - eyePos;
+    xAxis = xAxis.cross(yAxis);
+    yAxis = zAxis.cross(xAxis.normalized());
+
+
+
+    //KS: 而观察矩阵是相机本身变换的逆变换 
+    Eigen::Matrix4f temp = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f translate;
+    translate <<
+        xAxis.x(), yAxis.x(), zAxis.x(), 0,
+        xAxis.y(), yAxis.y(), zAxis.y(), 0,
+        xAxis.z(), yAxis.z(), zAxis.z(), 0,
+        -(xAxis.dot(eyePos)), -(yAxis.dot(eyePos)), -(zAxis.dot(eyePos)), 1;
+    view = translate * temp;//KS: set view matrix 
+
+}
+
 void Rst::Rasterizer::SetView(Eigen::Vector3f eyePos)
 {
     //KS: 而观察矩阵是相机本身变换的逆变换 
@@ -85,8 +110,8 @@ void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear
         0, 0, 2 / (zNear - zFar), 0,
         0, 0, 0, 1;
 
-    projection = p2o * m * s;
-
+    projection = s*m*p2o;
+   
 }
 
 
@@ -95,6 +120,7 @@ void Rst::Rasterizer::SetProjection(float eyeFov, float aspectRatio, float zNear
 //////////////////////////////////////////////////////////////
 // 框架基本功能
 //////////////////////////////////////////////////////////////
+
 //KS: 初始化窗口 
 Rst::Rasterizer::Rasterizer(int w, int h) :width(w), height(h)
 {

@@ -68,6 +68,7 @@ namespace Rst{
 		Rasterizer(int w, int h);
 		void SetModel(float rotationX, float rotationY, float rotationZ);
 		void SetView(Eigen::Vector3f eyePos);
+		void SetView(Eigen::Vector3f eyePos, Eigen::Vector3f at);
 		void SetProjection(float camFov,float aspectRatio,float zNear,float zFar);
 		void SetPixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color);
 		void SetPixel(const Eigen::Vector2i& point, const Eigen::Vector3f& color);
@@ -102,8 +103,8 @@ namespace Rst{
 
 		
 	private:
-		int GetNextId() { return next_id++; }
-		int GetIndex(int x, int y) { return (height - 1-y) * width + x; }
+		int GetNextId() { return next_id++; }//KS: 为prosition index color 分配id 
+		int GetIndex(int x, int y) { return (height - 1 - y) * width + x; }//KS: 根据像素拿到索引 
 		Eigen::Vector4f ToVec4(const Eigen::Vector3f& v3, float w = 1.0f)
 		{
 			return Eigen::Vector4f(v3.x(), v3.y(), v3.z(), w);
